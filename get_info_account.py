@@ -42,7 +42,7 @@ def mysql_dump(search_account,domain):
 
 def report(search_account,command_output,list_raw,domain):
     report_account = open("%s(%s).%s" %(domain, search_account, now_time), "w")
-    report_account.write("\n#-------------- Domain(s) and path(s) account %s ----------------#\n" %(search_account))
+    report_account.write("\n#-------------- domain(s), path(s), ssl [account %s] ----------------#\n" %(search_account))
     for acc in list_account:
         if (list_raw[acc][0]) == search_account:
             report_account.write("\n[%s] [%s] -> %s\n\n" %(list_raw[acc][2], acc,list_raw[acc][4]))
@@ -53,10 +53,12 @@ def report(search_account,command_output,list_raw,domain):
                     for line in d:
                         report_account.write(line)
                     report_account.write('\n')
-                f.close
+                    f.close
+            else:
+                report_account.write("No ssl certificate for domain %s\n" %(acc))
     list_db_user =  re.findall(r'db:\s\w+\s+user:\s\w+', command_output)
     list_db_user = [x.replace(' ', '') for x in list_db_user]
-    report_account.write("\n#-------------------- Databases ---------------------#\n\n%s\n\n" %(('\n'.join(list_db_user))))
+    report_account.write("\n#-------------------- databases ---------------------#\n\n%s\n\n" %(('\n'.join(list_db_user))))
     report_account.close()
 
 try:
