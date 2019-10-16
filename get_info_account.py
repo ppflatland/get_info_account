@@ -18,7 +18,7 @@ list_raw = json.loads(file_read)
 list_account=list_raw.keys()
 
 search_account =''
-now_time = datetime.now().strftime('%H:%M:%S')
+now_time = datetime.now().strftime('%m-%d-%y-%H:%M:%S')
 
 
 def info_domain(domain):
@@ -46,8 +46,8 @@ def report(search_account,command_output,list_raw,domain):
     for acc in list_account:
         if (list_raw[acc][0]) == search_account:
             report_account.write("\n[%s] [%s] -> %s\n\n" %(list_raw[acc][2], acc,list_raw[acc][4]))
-            if os.path.exists("/root/msasov/ssl/combined"):
-                with open(r"/root/msasov/ssl/combined", "r+") as f:
+            if os.path.exists("/var/cpanel/ssl/apache_tls/%s/combined" %(acc)):
+                with open(r"/var/cpanel/ssl/apache_tls/%s/combined"%(acc), "r+") as f:
                     d = f.readlines()
                     f.seek(0)
                     for line in d:
