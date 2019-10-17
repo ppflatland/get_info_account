@@ -1,16 +1,15 @@
 #!/usr/bin/python
 
 #######################################################
-# get_info_account(domain,path,ssl,cron) script for whm/cpanel
+# get_info_account(domain,path,ssl,php) script for whm/cpanel(cloudlinux)
 # Maxim Sasov  (maksim.sasov@hoster.by)
 #######################################################
 
-from datetime import datetime
 import os, re,subprocess, sys, time
 import simplejson as json
 import socket
 
-global search_account, now_time, domain, command_output, list_raw, list_account
+global search_account, domain, command_output, list_raw, list_account
 
 userdata = '/etc/userdatadomains.json'
 file_read = open(userdata).read()
@@ -18,7 +17,6 @@ list_raw = json.loads(file_read)
 list_account=list_raw.keys()
 
 search_account =''
-now_time = datetime.now().strftime('%m-%d-%y-%H:%M:%S')
 
 
 def info_domain(domain):
@@ -30,9 +28,9 @@ def info_domain(domain):
         print('Domain ',domain,' not found on this server!')
         sys.exit()
     else:
-        mysql_dump(search_account,domain)   
+        check_info(search_account,domain)   
         
-def mysql_dump(search_account,domain):
+def check_info(search_account,domain):
     cmd1 = ('cpapi2 --user=%s MysqlFE listdbs' %(search_account))
     PIPE = subprocess.PIPE
     command_process = subprocess.Popen(cmd1, shell=True, stdin=PIPE, stdout=PIPE, stderr=subprocess.STDOUT)
@@ -41,8 +39,9 @@ def mysql_dump(search_account,domain):
 
 
 def report(search_account,command_output,list_raw,domain):
-    report_account = open("%s(%s).%s" %(domain, search_account, now_time), "w")
+    report_account = open("%s_%s.report" %(domain, search_account), "w")
     report_account.write("\n#-------------- domain(s), path(s), ssl [account %s] ----------------#\n" %(search_account))
+    report_account.write("\nPHP - %s \n" %(os.popen('/usr/bin/selectorctl --user-current --user=%s' %(search_account)).read()))
     for acc in list_account:
         if (list_raw[acc][0]) == search_account:
             report_account.write("\n[%s] [%s] -> %s\n\n" %(list_raw[acc][2], acc,list_raw[acc][4]))
@@ -65,5 +64,5 @@ try:
     argv1=sys.argv[1]
     info_domain(argv1)
 except IndexError:
-    print("No parametr")
+    print("no argument")
     sys.exit (1)
