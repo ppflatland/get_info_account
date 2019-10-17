@@ -56,7 +56,7 @@ def report(search_account,command_output,list_raw,domain):
                     f.close
             else:
                 report_account.write("No ssl certificate for domain %s\n" %(acc))
-    list_db_user =  re.findall(r'db:\s\w+\s+user:\s\w+', command_output)
+    list_db_user =  re.findall(r'db:\s\S+\s+user:\s\w+', command_output)
     list_db_user = [x.replace(' ', '') for x in list_db_user]
     report_account.write("\n#-------------------- databases ---------------------#\n\n%s\n\n" %(('\n'.join(list_db_user))))
     report_account.close()
