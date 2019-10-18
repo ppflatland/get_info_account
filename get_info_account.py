@@ -35,10 +35,17 @@ def check_info(search_account,domain):
     PIPE = subprocess.PIPE
     command_process = subprocess.Popen(cmd1, shell=True, stdin=PIPE, stdout=PIPE, stderr=subprocess.STDOUT)
     command_output = command_process.communicate()[0]
-    report(search_account,command_output,list_raw,domain)      
+    check_cron_task = os.popen('cpapi2 --user=%s Cron listcron' %(search_account)).read()
+    if re.search(r'command:', check_cron_task):
+        with open(r"/var/spool/cron/%s" %(search_account), "r+") as f:
+            list_cron = f.readlines()
+            f.close
+    else:
+        list_cron = "no cron tasks"                           
+    report(search_account,command_output,list_raw,domain,list_cron)      
 
 
-def report(search_account,command_output,list_raw,domain):
+def report(search_account,command_output,list_raw,domain,list_cron):
     report_account = open("%s_%s.report" %(domain, search_account), "w")
     report_account.write("\n#-------------- domain(s), path(s), ssl [account %s] ----------------#\n" %(search_account))
     report_account.write("\nPHP - %s \n" %(os.popen('/usr/bin/selectorctl --user-current --user=%s' %(search_account)).read()))
@@ -58,6 +65,7 @@ def report(search_account,command_output,list_raw,domain):
     list_db_user =  re.findall(r'db:\s\S+\s+user:\s\w+', command_output)
     list_db_user = [x.replace(' ', '') for x in list_db_user]
     report_account.write("\n#-------------------- databases ---------------------#\n\n%s\n\n" %(('\n'.join(list_db_user))))
+    report_account.write("\n#-------------------- list cron ---------------------#\n\n%s\n\n" %(''.join(list_cron)))
     report_account.close()
 
 try:
